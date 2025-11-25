@@ -6,14 +6,25 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         try (Scanner sc = new Scanner(System.in)) {
-            if (!sc.hasNextLong()) { System.out.println("INVALID_INPUT"); return; }
+            if (!sc.hasNextLong()) {
+                System.out.println("INVALID_INPUT");
+                return;
+            }
             long a = sc.nextLong();
-            if (!sc.hasNextLong()) { System.out.println("INVALID_INPUT"); return; }
+
+            if (!sc.hasNextLong()) {
+                System.out.println("INVALID_INPUT");
+                return;
+            }
             long b = sc.nextLong();
-            if (!sc.hasNextLong()) { System.out.println("INVALID_INPUT"); return; }
+
+            if (!sc.hasNextLong()) {
+                System.out.println("INVALID_INPUT");
+                return;
+            }
             long c = sc.nextLong();
 
-            Optional<TriangleType> type = TriangleClassifier.classify(a, b, c);
+            Optional<TriangleTypeEnum> type = TriangleClassifier.classify(a, b, c);
             if (type.isEmpty()) {
                 System.out.println("NOT_TRIANGLE");
             } else {
@@ -23,5 +34,4 @@ public class Main {
             System.out.println("INVALID_INPUT");
         }
     }
-
 }
