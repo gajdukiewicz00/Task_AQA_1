@@ -1,140 +1,139 @@
-# Triangle Classifier
+# Triangle Classification — AQA Task
 
-Проект для классификации треугольников по длинам их сторон. Определяет, могут ли три заданных числа образовать треугольник, и классифицирует его тип: равносторонний, равнобедренный или разносторонний.
+A Java console application that reads three side lengths, determines whether they form a triangle, and classifies it using an enum `TriangleTypeEnum`.  
+The project includes full domain analysis, boundary testing, and parametrized JUnit tests.
 
-## Описание
+---
 
-Проект реализует классификатор треугольников, который:
-- Проверяет, могут ли три заданных числа образовать треугольник (согласно неравенству треугольника)
-- Классифицирует треугольник на один из типов:
-  - **EQUILATERAL** - равносторонний (все стороны равны)
-  - **ISOSCELES** - равнобедренный (две стороны равны)
-  - **SCALENE** - разносторонний (все стороны различны)
-
-## Требования
-
-- Java 17 или выше
-- Maven 3.6 или выше
-
-## Структура проекта
+## 📁 Project Structure
 
 ```
-AQA/
-├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── com/
-│   │           └── example/
-│   │               └── triangles/
-│   │                   ├── Main.java                    # Точка входа приложения
-│   │                   ├── TriangleClassifier.java      # Основная логика классификации
-│   │                   └── TriangleType.java            # Enum с типами треугольников
-│   └── test/
-│       └── java/
-│           └── com/
-│               └── example/
-│                   └── triangles/
-│                       └── TriangleClassifierTest.java  # Параметризованные тесты
-└── pom.xml
+src
+├── main
+│   └── java
+│       └── com.example.triangles
+│           ├── Main.java
+│           ├── TriangleClassifier.java
+│           └── TriangleTypeEnum.java
+└── test
+    └── java
+        └── com.example.triangles
+            └── TriangleClassifierTest.java
 ```
 
-## Сборка проекта
+---
 
-Для сборки проекта выполните:
+## ▶️ How It Works
+
+1. **Input**: three values (as `long`)
+2. Program validates whether the values can form a triangle  
+   - If **not a triangle** → prints:  
+     ```
+     NOT_TRIANGLE
+     ```
+3. If valid → classification is printed via `TriangleTypeEnum`:
+   - `EQUILATERAL`
+   - `ISOSCELES`
+   - `SCALENE`
+
+---
+
+## 🏗 Build
 
 ```bash
-mvn clean compile
+mvn clean package
 ```
 
-## Запуск приложения
-
-Для запуска интерактивного приложения:
+## ▶️ Run
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.example.triangles.Main"
+echo "3 4 5" | java -jar target/TriangleClassifier.jar
 ```
 
-Или после компиляции:
-
-```bash
-java -cp target/classes com.example.triangles.Main
-```
-
-При запуске программа попросит ввести три неотрицательных целых числа (стороны треугольника) и выведет тип треугольника или сообщение "Not a triangle", если треугольник невозможен.
-
-### Пример использования
-
-```
-Enter three non-negative integers (a b c):
-5 5 8
-Triangle type: ISOSCELES
-```
-
-## Запуск тестов
-
-Для запуска всех тестов:
+## 🧪 Run Tests
 
 ```bash
 mvn test
 ```
 
-Тесты включают:
-- Проверку валидности треугольника (метод `isTriangle`)
-- Классификацию валидных треугольников
-- Обработку невалидных входных данных
-- Проверку инвариантности относительно перестановки сторон
+---
 
-## Основные классы
+## 📘 DOMAIN TESTING
 
-### TriangleClassifier
+This section contains all equivalence classes and boundary values used to validate and classify triangles.
 
-Утилитный класс с методами:
-- `isTriangle(long a, long b, long c)` - проверяет, могут ли три числа образовать треугольник
-- `classify(long a, long b, long c)` - классифицирует треугольник, возвращает `Optional<TriangleType>`
-- `parseThreeInts(String a, String b, String c)` - парсит три строки в массив чисел
+### 1. Invalid Input & Non-Triangles (isTriangle == false)
 
-### TriangleType
+| ID  | Class Description              | Condition           | Examples                                    | Expected Result  |
+|-----|--------------------------------|---------------------|---------------------------------------------|------------------|
+| NV1 | Zero sides                     | any side = 0        | (0,1,1), (0,0,0)                            | NOT_TRIANGLE     |
+| NV2 | Negative sides                 | any side < 0        | (-1,2,2), (-5,3,3)                          | NOT_TRIANGLE     |
+| NV3 | Triangle inequality violated   | min + mid ≤ max     | (1,2,3), (5,5,10), (1,1000000,1000001)      | NOT_TRIANGLE     |
+| NV4 | Invalid numeric input          | invalid string or overflow during parsing | ("x","1","1"), ("1","2","9e18") | INVALID_INPUT    |
 
-Enum с типами треугольников:
-- `EQUILATERAL` - равносторонний
-- `ISOSCELES` - равнобедренный
-- `SCALENE` - разносторонний
+### 2. Valid Triangles (isTriangle == true)
 
-## Алгоритм
+| ID | Triangle Type | Condition                  | Examples                                                                                      | Expected Result |
+|----|---------------|----------------------------|-----------------------------------------------------------------------------------------------|-----------------|
+| V1 | Equilateral   | a = b = c                  | (1,1,1), (2147483647,2147483647,2147483647)                                                   | EQUILATERAL     |
+| V2 | Isosceles     | exactly two sides equal    | MIN: (2,2,3)<br>(5,5,8), (10,10,19), (1500000000,1500000000,2000000000)                      | ISOSCELES       |
+| V3 | Scalene       | all sides different        | (3,4,5), (2,3,4), (6,7,10)                                                                    | SCALENE         |
 
-Треугольник считается валидным, если:
-1. Все стороны положительны (a > 0, b > 0, c > 0)
-2. Выполняется неравенство треугольника: сумма любых двух сторон больше третьей
+#### 🔹 Special note on V2 (Isosceles MIN set)
+The reviewer requested explicitly adding the smallest positive integer example:
 
-Классификация:
-- Если все три стороны равны → `EQUILATERAL`
-- Если ровно две стороны равны → `ISOSCELES`
-- Если все стороны различны → `SCALENE`
+**(2, 2, 3)**
 
-## Тестирование
+Since:
+- 2 + 2 > 3
 
-Проект использует JUnit 5 с параметризованными тестами для покрытия:
-- Граничных значений
-- Эквивалентных классов
-- Различных перестановок сторон
-- Больших чисел (включая значения близкие к `Long.MAX_VALUE`)
+This is the minimal valid representative for the isosceles class.
 
-## Domain Testing
+---
 
-Для покрытия всех сценариев поведения выполнен анализ домена входных данных  
-(классы эквивалентности + граничные значения).
+## 🧪 Test Strategy
 
-| ID | Класс / Цель | Описание условия | Примеры входных данных (a, b, c) | Ожидаемый результат |
-|----|---------------|------------------|----------------------------------|----------------------|
-| V1 | Валидный — равносторонний | Все стороны равны и >0 | (5,5,5), (10,10,10) | EQUILATERAL |
-| V2 | Валидный — равнобедренный | Ровно две стороны равны, выполняются неравенства | (5,5,3), (5,3,5), (3,5,5), (2147483647,2147483647,2147483646) | ISOSCELES |
-| V3 | Валидный — разносторонний | Все стороны разные, соблюдены неравенства | (4,5,6), (2,3,4), (3,4,5) | SCALENE |
-| I1 | Вырожденный | a + b = c | (1,2,3), (5,5,10) | NOT_TRIANGLE |
-| I2 | Нарушено неравенство | a + b < c | (1,10,12), (2,2,5) | NOT_TRIANGLE |
-| I3 | Нули | Хотя бы одна сторона = 0 | (0,0,0), (0,1,1) | NOT_TRIANGLE |
-| I4 | Отрицательные значения | Вход вне домена задачи | (-1,2,3), (-5,-5,5) | INVALID_INPUT |
-| B1 | Максимальные значения | Проверка работы на int max | (2147483647,2147483647,2147483647) | EQUILATERAL |
-| B2 | Большие почти равные | Большие значения без переполнения | (1500000000,1500000000,2000000000) | ISOSCELES |
+The test suite includes:
 
-Эти наборы используются в параметризованных тестах.
+### ✔ Combined Domain Test
+A single parametrized test verifies:
+- `isTriangle(a,b,c)`
+- `classify(a,b,c)` consistency
+- `Optional.empty()` for invalid triangles
+- Correct `TriangleTypeEnum` for valid triangles
 
+*This addresses the reviewer comment about redundancy in `testIsTriangle` and `testClassifyInvalid`.*
+
+### ✔ Permutation Invariance
+A separate test confirms that order of sides does not affect classification.
+
+### ✔ Parsing Tests (parseThreeInts)
+Covers:
+- Valid numeric strings
+- Invalid numeric strings
+- Overflow errors
+- Null inputs (NPE expected)
+
+---
+
+## 🧩 Technologies
+
+- Java 17
+- Maven
+- JUnit 5
+- Parametrized Tests
+- Enum-based classification (`TriangleTypeEnum`)
+
+---
+
+## 📜 Example Output
+
+**Input:**
+```
+3 4 5
+```
+
+**Output:**
+```
+SCALENE
+```
